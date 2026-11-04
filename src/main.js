@@ -214,7 +214,6 @@ function createSpringPendulum() {
   forceGroup.add(restoring);
   pivot.add(forceGroup);
 
-  addEquilibriumMarker(group, 0.05);
   group.userData = { type: 'spring', spring, mass, forceGroup, pivot, springLength: 1.05 };
   return group;
 }
