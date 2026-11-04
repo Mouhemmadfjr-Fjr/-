@@ -10,7 +10,7 @@ app.innerHTML = `
       <div class="brand">
         <div class="brand-mark"><i class="fa-solid fa-atom"></i></div>
         <div>
-          <h1>مختبر النواسات الثلاثي</h1>
+          <h1>مختبر النواسات الأربعة</h1>
           <p>محاكاة فيزيائية واقعية وتفاعلية</p>
         </div>
       </div>
@@ -80,6 +80,7 @@ const params = {
   compoundI: 1.2,
   compoundM: 2.4,
   compoundD: 0.3,
+  compoundTheta: 0.42,
 };
 
 const state = {
@@ -109,6 +110,7 @@ const controlDefinitions = [
   { id: 'compoundI', label: 'عزم العطالة', min: 0.2, max: 3, step: 0.1 },
   { id: 'compoundM', label: 'الكتلة', min: 0.6, max: 5, step: 0.1 },
   { id: 'compoundD', label: 'بعد المركز', min: 0.08, max: 0.8, step: 0.02 },
+  { id: 'compoundTheta', label: 'السعة الزاوية للمركب', min: 0.1, max: 0.9, step: 0.02 },
 ];
 
 function makeMaterial(color, emissive = 0x000000, roughness = 0.45) {
@@ -152,7 +154,6 @@ function createSpringPendulum() {
     new THREE.CylinderGeometry(0.16, 0.16, 2.5, 26, 1, true),
     makeMaterial(0x7c3aed, 0x4c1d95, 0.38)
   );
-  spring.rotation.z = Math.PI / 2;
   spring.position.set(0, -0.2, 0);
   pivot.add(spring);
 
@@ -205,7 +206,6 @@ function createTorsionPendulum() {
 
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.2, 36), makeMaterial(0x0f172a, 0x1e293b, 0.3));
   disc.position.y = 1.9;
-  disc.rotation.x = Math.PI / 2;
   rotor.add(disc);
 
   const arrow = makeArrow(0xd97706, 2.1, 0.06);
@@ -241,14 +241,13 @@ function createSimplePendulum() {
   bob.position.y = -2.1;
   pivot.add(bob);
 
-  const weightArrow = makeArrow(0xb45309, 1.6, 0.05);
+  const weightArrow = makeArrow(0xb45309, 1.2, 0.05);
   weightArrow.position.set(0.5, -1.4, 0);
-  weightArrow.rotation.z = -Math.PI / 2;
+  weightArrow.rotation.z = Math.PI;
   pivot.add(weightArrow);
 
-  const tensionArrow = makeArrow(0x0284c7, 1.7, 0.05);
+  const tensionArrow = makeArrow(0x0284c7, 1.5, 0.05);
   tensionArrow.position.set(-0.5, -0.2, 0);
-  tensionArrow.rotation.z = Math.PI * 0.5;
   pivot.add(tensionArrow);
 
   group.userData = { type: 'simple', pivot, string, bob, weightArrow, tensionArrow };
@@ -373,7 +372,7 @@ function updateStats() {
   const simpleW = Math.sqrt(params.simpleG / params.simpleL);
   const simpleTheta = params.simpleTheta * Math.cos(simpleW * state.time);
   const compoundW = Math.sqrt((params.compoundM * 9.81 * params.compoundD) / params.compoundI);
-  const compoundTheta = 0.6 * Math.cos(compoundW * state.time);
+  const compoundTheta = params.compoundTheta * Math.cos(compoundW * state.time);
 
   const stats = [
     { label: 'T0', value: (2 * Math.PI * Math.sqrt(params.springMass / params.springK)).toFixed(2) + ' s' },
@@ -382,6 +381,9 @@ function updateStats() {
     { label: 'θ', value: torsionTheta.toFixed(2) + ' rad' },
     { label: 'β', value: simpleTheta.toFixed(2) + ' rad' },
     { label: 'φ', value: compoundTheta.toFixed(2) + ' rad' },
+    { label: 'v spring', value: (-params.springXmax * springW * Math.sin(springW * state.time)).toFixed(2) + ' m/s' },
+    { label: 'a spring', value: (-springW * springW * springX).toFixed(2) + ' m/s²' },
+    { label: 'E spring', value: (0.5 * params.springK * springX * springX + 0.5 * params.springMass * Math.pow(params.springXmax * springW * Math.sin(springW * state.time), 2)).toFixed(2) + ' J' },
   ];
 
   statGrid.innerHTML = stats.map((stat) => `
@@ -392,13 +394,13 @@ function updateStats() {
   `).join('');
 
   const springData = pendulums.spring.userData;
-  springData.spring.scale.y = 1 + Math.abs(springX) * 0.6;
-  springData.mass.position.y = -1.6 - springX * 1.8;
+  const springDisplacement = springX * 1.8;
+  springData.spring.scale.y = Math.max(0.45, 1 + springDisplacement * 0.25);
+  springData.mass.position.y = -1.6 - springDisplacement;
   springData.forceGroup.visible = state.showForces;
 
   const torsionData = pendulums.torsion.userData;
-  torsionData.rotor.rotation.z = torsionTheta;
-  torsionData.rotor.rotation.y = torsionTheta * 0.55;
+  torsionData.rotor.rotation.y = torsionTheta;
   torsionData.forceArrow.visible = state.showForces;
 
   const simpleData = pendulums.simple.userData;
@@ -411,7 +413,7 @@ function updateStats() {
 
   const compoundData = pendulums.compound.userData;
   compoundData.arm.rotation.z = compoundTheta;
-  compoundData.mass.position.y = -2.8 - params.compoundD * 1.1;
+  compoundData.mass.position.y = -2.8;
   compoundData.weightArrow.visible = state.showForces;
 
   updateInfo();
@@ -449,7 +451,6 @@ function animate() {
   const compoundW = Math.sqrt((params.compoundM * 9.81 * params.compoundD) / params.compoundI);
   const compoundTheta = 0.6 * Math.cos(compoundW * state.time);
 
-  updateStats();
   orbitControls.update();
   renderer.render(scene, camera);
 }
@@ -494,6 +495,7 @@ playBtn.addEventListener('click', () => {
 
 document.getElementById('reset-scene').addEventListener('click', () => {
   state.time = 0;
+  scene.rotation.set(0, 0, 0);
   state.play = true;
   playBtn.textContent = 'إيقاف مؤقت';
 });
@@ -507,7 +509,7 @@ document.getElementById('toggle-forces').addEventListener('click', () => {
 document.getElementById('toggle-energy').addEventListener('click', () => {
   state.showEnergy = !state.showEnergy;
   document.getElementById('toggle-energy').textContent = state.showEnergy ? 'إخفاء الطاقة' : 'إظهار الطاقة';
-  document.body.style.filter = state.showEnergy ? 'none' : 'saturate(0.5)';
+  document.getElementById('metrics').classList.toggle('energy-hidden', !state.showEnergy);
 });
 
 buildControls();
