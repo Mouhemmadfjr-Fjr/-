@@ -38,6 +38,17 @@ app.innerHTML = `
         </div>
         <div id="scene-wrap"></div>
 
+        <div class="scene-key" aria-label="دليل الرموز والإشارات">
+          <div class="scene-key-title"><i class="fa-solid fa-compass-drafting"></i> دليل الرموز والإشارات</div>
+          <div class="scene-key-items">
+            <span class="key-item"><b class="key-symbol symbol-motion">x / θ</b><span>الإزاحة أو زاوية الانحراف</span></span>
+            <span class="key-item"><b class="key-symbol symbol-gravity">↓ mg</b><span>قوة الثقل نحو الأسفل</span></span>
+            <span class="key-item"><b class="key-symbol symbol-tension">↑ T</b><span>شد الخيط / النابض نحو نقطة التعليق</span></span>
+            <span class="key-item"><b class="key-symbol symbol-restoring">↶ Fᵣ / τ</b><span>قوة أو عزم الإرجاع نحو وضع التوازن</span></span>
+            <span class="key-item"><b class="key-symbol symbol-equilibrium">┆ O</b><span>موضع التوازن أو محور الدوران</span></span>
+          </div>
+        </div>
+
         <div class="toolbar">
           <button class="tool-btn" id="toggle-play">إيقاف مؤقت</button>
           <button class="tool-btn secondary" id="reset-scene">إعادة الضبط</button>
