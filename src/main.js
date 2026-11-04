@@ -145,6 +145,36 @@ function makeArrow(color, length = 1.6, radius = 0.06) {
   return group;
 }
 
+
+function makeLabel(text, color = '#172033') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = 'bold 76px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(255,255,255,0.96)';
+  ctx.strokeText(text, 256, 80);
+  ctx.fillStyle = color; ctx.fillText(text, 256, 80);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }));
+  sprite.scale.set(1.35, 0.42, 1);
+  sprite.renderOrder = 10;
+  return sprite;
+}
+
+function addEquilibriumMarker(parent, y = 0) {
+  const points = [new THREE.Vector3(0, y - 2.4, 0.04), new THREE.Vector3(0, y + 0.25, 0.04)];
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineDashedMaterial({ color: 0x64748b, dashSize: 0.12, gapSize: 0.08 }));
+  line.computeLineDistances();
+  parent.add(line);
+  const label = makeLabel('O  وضع التوازن', '#475569');
+  label.position.set(0.85, y + 0.12, 0.12);
+  parent.add(label);
+  return line;
+}
+
 function createSpringPendulum() {
   const group = new THREE.Group();
   group.position.set(-5.2, 0, 0);
@@ -189,7 +219,11 @@ function createSpringPendulum() {
   forceText.position.set(1.2, -0.7, 0);
   forceGroup.add(forceText);
 
+  weight.add(makeLabel('P = mg', '#b45309')).position.set(0.65, -1.1, 0.1);
+  restore.add(makeLabel('Fₑ = −kx', '#0369a1')).position.set(0.8, -1.1, 0.1);
+  forceText.add(makeLabel('x', '#a16207')).position.set(0.65, -0.7, 0.1);
   pivot.add(forceGroup);
+  addEquilibriumMarker(group, 0);
 
   group.userData = { type: 'spring', spring, mass, forceGroup, pivot };
   return group;
@@ -224,6 +258,8 @@ function createTorsionPendulum() {
   arrow.rotation.z = Math.PI * 0.5;
   group.add(arrow);
 
+  arrow.add(makeLabel('τᵣ = −κθ', '#b45309')).position.set(0.8, 1.2, 0.1);
+  addEquilibriumMarker(group, 1.9);
   group.userData = { type: 'torsion', rotor, rod, disc, forceArrow: arrow };
   return group;
 }
@@ -260,6 +296,10 @@ function createSimplePendulum() {
   const tensionArrow = makeArrow(0x0284c7, 1.5, 0.05);
   tensionArrow.position.set(-0.5, -0.2, 0);
   pivot.add(tensionArrow);
+  weightArrow.add(makeLabel('P = mg', '#b45309')).position.set(0.65, -0.8, 0.1);
+  tensionArrow.add(makeLabel('T', '#0369a1')).position.set(0.55, 0.8, 0.1);
+  const angleLabel = makeLabel('θ', '#7c3aed'); angleLabel.position.set(0.8, -0.35, 0.15); pivot.add(angleLabel);
+  addEquilibriumMarker(group, 1.7);
 
   group.userData = { type: 'simple', pivot, string, bob, weightArrow, tensionArrow };
   return group;
@@ -292,6 +332,10 @@ function createCompoundPendulum() {
   const weightArrow = makeArrow(0xd97706, 2.0, 0.06);
   weightArrow.position.set(0, -1.8, 0.8);
   arm.add(weightArrow);
+  weightArrow.add(makeLabel('P = mg', '#b45309')).position.set(0.8, -1.1, 0.1);
+  const centerLabel = makeLabel('G', '#7c3aed'); centerLabel.position.set(0.45, -2.8, 0.25); arm.add(centerLabel);
+  const pivotLabel = makeLabel('O', '#475569'); pivotLabel.position.set(0.35, 2.15, 0.2); group.add(pivotLabel);
+  const dLabel = makeLabel('d', '#7c3aed'); dLabel.position.set(0.45, 0.25, 0.2); arm.add(dLabel);
 
   group.userData = { type: 'compound', arm, rod, mass, weightArrow };
   return group;
