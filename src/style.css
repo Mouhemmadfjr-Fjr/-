@@ -313,3 +313,19 @@ button, input {
     height: 480px;
   }
 }
+
+
+/* Energy panel toggle and mobile-friendly controls */
+.energy-hidden { display: none !important; }
+.tool-btn, .nav-tab { touch-action: manipulation; }
+#scene-wrap { overflow: hidden; border-radius: 0 0 18px 18px; }
+@media (max-width: 600px) {
+  #app { padding: 12px; }
+  .topbar, .hero { padding: 16px; }
+  .topnav { width: 100%; }
+  .nav-tab { flex: 1 1 auto; padding: 9px 10px; }
+  #scene-wrap { height: 390px; }
+  .toolbar { padding-inline: 12px; }
+  .tool-btn { flex: 1 1 calc(50% - 10px); }
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
