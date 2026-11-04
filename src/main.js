@@ -442,14 +442,10 @@ function animate() {
     scene.rotation.y += 0.0026;
   }
 
-  const springW = Math.sqrt(params.springK / params.springMass);
-  const springX = params.springXmax * Math.cos(springW * state.time);
-  const torsionW = Math.sqrt(params.torsionK / params.torsionI);
-  const torsionTheta = params.torsionTheta * Math.cos(torsionW * state.time);
-  const simpleW = Math.sqrt(params.simpleG / params.simpleL);
-  const simpleTheta = params.simpleTheta * Math.cos(simpleW * state.time);
-  const compoundW = Math.sqrt((params.compoundM * 9.81 * params.compoundD) / params.compoundI);
-  const compoundTheta = 0.6 * Math.cos(compoundW * state.time);
+  if (Math.floor(state.time * 30) !== animate.lastStatsFrame) {
+    animate.lastStatsFrame = Math.floor(state.time * 30);
+    updateStats();
+  }
 
   orbitControls.update();
   renderer.render(scene, camera);
