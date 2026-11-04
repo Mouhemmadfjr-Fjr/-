@@ -169,66 +169,55 @@ function addEquilibriumMarker(parent, y = 0) {
   const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineDashedMaterial({ color: 0x64748b, dashSize: 0.12, gapSize: 0.08 }));
   line.computeLineDistances();
   parent.add(line);
-  const label = makeLabel('O  وضع التوازن', '#475569');
-  label.position.set(0.85, y + 0.12, 0.12);
-  parent.add(label);
   return line;
+}
+
+function createHelicalSpring(length, radius = 0.24, turns = 9) {
+  const points = [];
+  const segments = turns * 24;
+  for (let i = 0; i <= segments; i += 1) {
+    const t = i / segments, angle = t * turns * Math.PI * 2;
+    points.push(new THREE.Vector3(radius * Math.cos(angle), -length * t, radius * Math.sin(angle)));
+  }
+  const curve = new THREE.CatmullRomCurve3(points);
+  return new THREE.Mesh(new THREE.TubeGeometry(curve, segments, 0.035, 8, false), makeMaterial(0x7c3aed, 0x4c1d95, 0.38));
 }
 
 function createSpringPendulum() {
   const group = new THREE.Group();
   group.position.set(-5.2, 0, 0);
-
-  const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.18, 2.4), makeMaterial(0x4b5563, 0x000000, 0.7));
-  base.position.y = -2.5;
-  group.add(base);
-
-  const mount = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.42, 20), makeMaterial(0x334155));
-  mount.position.y = 1.8;
-  group.add(mount);
+  const support = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.18, 1.2), makeMaterial(0x4b5563, 0x000000, 0.7));
+  support.position.y = 2.05;
+  group.add(support);
+  const hook = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.28, 18), makeMaterial(0x334155));
+  hook.position.set(0, 1.82, 0);
+  group.add(hook);
 
   const pivot = new THREE.Group();
-  pivot.position.set(0, 1.9, 0);
+  pivot.position.set(0, 1.68, 0);
   group.add(pivot);
-
-  const spring = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.16, 0.16, 2.5, 26, 1, true),
-    makeMaterial(0x7c3aed, 0x4c1d95, 0.38)
-  );
-  spring.position.set(0, -0.2, 0);
+  const spring = createHelicalSpring(1.05);
   pivot.add(spring);
 
-  const mass = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.1, 1.1), makeMaterial(0x0ea5e9, 0x075985, 0.35));
-  mass.position.set(0, -1.6, 0);
+  const mass = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), makeMaterial(0x0ea5e9, 0x075985, 0.35));
+  mass.position.set(0, -1.5, 0);
   mass.castShadow = true;
   pivot.add(mass);
 
   const forceGroup = new THREE.Group();
-  const weight = makeArrow(0xf59e0b, 1.5, 0.05);
+  const weight = makeArrow(0xf59e0b, 1.1, 0.045);
   weight.rotation.z = Math.PI;
-  weight.position.set(0, -1.2, 0);
+  weight.position.set(0.72, -1.15, 0.15);
   forceGroup.add(weight);
-
-  const restore = makeArrow(0x0284c7, 1.8, 0.05);
-  restore.rotation.z = Math.PI;
-  restore.position.set(0, 0.2, 0);
-  forceGroup.add(restore);
-
-  const forceText = makeArrow(0xeab308, 1.3, 0.04);
-  forceText.rotation.z = Math.PI;
-  forceText.position.set(1.2, -0.7, 0);
-  forceGroup.add(forceText);
-
-  weight.add(makeLabel('P = mg', '#b45309')).position.set(0.65, -1.1, 0.1);
-  restore.add(makeLabel('Fₑ = −kx', '#0369a1')).position.set(0.8, -1.1, 0.1);
-  forceText.add(makeLabel('x', '#a16207')).position.set(0.65, -0.7, 0.1);
+  const restoring = makeArrow(0x0284c7, 0.9, 0.045);
+  restoring.position.set(-0.72, -0.45, 0.15);
+  forceGroup.add(restoring);
   pivot.add(forceGroup);
-  addEquilibriumMarker(group, 0);
 
-  group.userData = { type: 'spring', spring, mass, forceGroup, pivot };
+  addEquilibriumMarker(group, 0.05);
+  group.userData = { type: 'spring', spring, mass, forceGroup, pivot, springLength: 1.05 };
   return group;
 }
-
 function createTorsionPendulum() {
   const group = new THREE.Group();
   group.position.set(-1.7, 0, 0);
@@ -258,7 +247,6 @@ function createTorsionPendulum() {
   arrow.rotation.z = Math.PI * 0.5;
   group.add(arrow);
 
-  arrow.add(makeLabel('τᵣ = −κθ', '#b45309')).position.set(0.8, 1.2, 0.1);
   addEquilibriumMarker(group, 1.9);
   group.userData = { type: 'torsion', rotor, rod, disc, forceArrow: arrow };
   return group;
@@ -296,9 +284,6 @@ function createSimplePendulum() {
   const tensionArrow = makeArrow(0x0284c7, 1.5, 0.05);
   tensionArrow.position.set(-0.5, -0.2, 0);
   pivot.add(tensionArrow);
-  weightArrow.add(makeLabel('P = mg', '#b45309')).position.set(0.65, -0.8, 0.1);
-  tensionArrow.add(makeLabel('T', '#0369a1')).position.set(0.55, 0.8, 0.1);
-  const angleLabel = makeLabel('θ', '#7c3aed'); angleLabel.position.set(0.8, -0.35, 0.15); pivot.add(angleLabel);
   addEquilibriumMarker(group, 1.7);
 
   group.userData = { type: 'simple', pivot, string, bob, weightArrow, tensionArrow };
@@ -332,10 +317,6 @@ function createCompoundPendulum() {
   const weightArrow = makeArrow(0xd97706, 2.0, 0.06);
   weightArrow.position.set(0, -1.8, 0.8);
   arm.add(weightArrow);
-  weightArrow.add(makeLabel('P = mg', '#b45309')).position.set(0.8, -1.1, 0.1);
-  const centerLabel = makeLabel('G', '#7c3aed'); centerLabel.position.set(0.45, -2.8, 0.25); arm.add(centerLabel);
-  const pivotLabel = makeLabel('O', '#475569'); pivotLabel.position.set(0.35, 2.15, 0.2); group.add(pivotLabel);
-  const dLabel = makeLabel('d', '#7c3aed'); dLabel.position.set(0.45, 0.25, 0.2); arm.add(dLabel);
 
   group.userData = { type: 'compound', arm, rod, mass, weightArrow };
   return group;
@@ -449,9 +430,18 @@ function updateStats() {
   `).join('');
 
   const springData = pendulums.spring.userData;
-  const springDisplacement = springX * 1.8;
-  springData.spring.scale.y = Math.max(0.45, 1 + springDisplacement * 0.25);
-  springData.mass.position.y = -1.6 - springDisplacement;
+  const springDisplacement = springX * 0.75;
+  const springLength = Math.max(0.55, 1.05 + springDisplacement);
+  if (Math.abs(springLength - springData.springLength) > 0.015) {
+    const oldSpring = springData.spring;
+    springData.pivot.remove(oldSpring);
+    oldSpring.geometry.dispose();
+    oldSpring.material.dispose();
+    springData.spring = createHelicalSpring(springLength);
+    springData.pivot.add(springData.spring);
+    springData.springLength = springLength;
+  }
+  springData.mass.position.y = -springLength - 0.45;
   springData.forceGroup.visible = state.showForces;
 
   const torsionData = pendulums.torsion.userData;
