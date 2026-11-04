@@ -229,17 +229,27 @@ function createTorsionPendulum() {
   support.position.y = 1.8;
   group.add(support);
 
+  // سلك فتل شاقولي يحمل ساقاً أفقية تدور في مستوى أفقي
+  const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.55, 12), makeMaterial(0x64748b, 0x334155, 0.3));
+  wire.position.set(0, 1.0, 0);
+  group.add(wire);
+
   const rotor = new THREE.Group();
-  rotor.position.set(0, 1.9, 0);
+  rotor.position.set(0, 0.22, 0);
   group.add(rotor);
 
-  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.2, 16), makeMaterial(0xf59e0b, 0x92400e, 0.45));
-  rod.position.y = 0.2;
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 3.0, 16), makeMaterial(0xf59e0b, 0x92400e, 0.45));
+  rod.rotation.z = Math.PI / 2;
   rotor.add(rod);
 
-  const disc = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.2, 36), makeMaterial(0x0f172a, 0x1e293b, 0.3));
-  disc.position.y = 1.9;
-  rotor.add(disc);
+  const weightA = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 20), makeMaterial(0x0f766e, 0x134e4a, 0.3));
+  weightA.position.x = -1.05;
+  const weightB = weightA.clone();
+  weightB.position.x = 1.05;
+  rotor.add(weightA, weightB);
+
+  const center = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.22, 24), makeMaterial(0x334155));
+  rotor.add(center);
 
   const arrow = makeArrow(0xd97706, 2.1, 0.06);
   arrow.position.set(1.2, 1.3, 0);
@@ -247,7 +257,7 @@ function createTorsionPendulum() {
   group.add(arrow);
 
   addEquilibriumMarker(group, 1.9);
-  group.userData = { type: 'torsion', rotor, rod, disc, forceArrow: arrow };
+  group.userData = { type: 'torsion', rotor, rod, wire, forceArrow: arrow };
   return group;
 }
 
@@ -305,13 +315,22 @@ function createCompoundPendulum() {
   arm.position.set(0, 1.9, 0);
   group.add(arm);
 
-  const rod = new THREE.Mesh(new THREE.BoxGeometry(0.2, 3.4, 0.2), makeMaterial(0xfef3c7, 0xd97706, 0.25));
-  rod.position.y = -1.2;
+  // قضيب صلب يدور حول محور أفقي لا يمر بمركز كتلته
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 3.35, 18), makeMaterial(0x8b5cf6, 0x4c1d95, 0.28));
+  rod.position.y = -0.45;
   arm.add(rod);
 
-  const mass = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 20), makeMaterial(0x8b5cf6, 0x4c1d95, 0.2));
-  mass.position.y = -2.8;
+  const pivotMarker = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.055, 12, 32), makeMaterial(0xf59e0b, 0x92400e));
+  pivotMarker.position.y = 0;
+  arm.add(pivotMarker);
+
+  const mass = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), makeMaterial(0xfbbf24, 0x78350f, 0.2));
+  mass.position.y = -2.0;
   arm.add(mass);
+
+  const centerOfMass = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), makeMaterial(0xef4444, 0x7f1d1d));
+  centerOfMass.position.y = -0.45;
+  arm.add(centerOfMass);
 
   const weightArrow = makeArrow(0xd97706, 2.0, 0.06);
   weightArrow.position.set(0, -1.8, 0.8);
@@ -349,6 +368,14 @@ const pendulums = {
 };
 
 Object.values(pendulums).forEach((pendulum) => scene.add(pendulum));
+
+// عناوين الأجهزة في مساحة مستقلة أعلى المجسمات لتجنب تداخلها مع الأسهم
+[['spring', 'النواس المرن'], ['torsion', 'نواس الفتل'], ['simple', 'النواس الثقلي البسيط'], ['compound', 'النواس الثقلي المركب']].forEach(([key, title]) => {
+  const label = makeLabel(title, '#0f766e');
+  label.scale.set(2.25, 0.48, 1);
+  label.position.set(pendulums[key].position.x, 3.15, 0.25);
+  scene.add(label);
+});
 
 function setMode(mode) {
   state.activeMode = mode;
