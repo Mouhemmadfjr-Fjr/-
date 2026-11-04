@@ -329,3 +329,57 @@ button, input {
   .tool-btn { flex: 1 1 calc(50% - 10px); }
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+/* Arabic physics legend: symbols, meanings, and vector directions */
+.scene-key {
+  margin: 14px 18px 0;
+  padding: 14px 16px;
+  border: 1px solid #d8c6a8;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 24px -20px rgba(45, 35, 25, 0.35);
+}
+.scene-key-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2b241d;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+.scene-key-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 9px 14px;
+}
+.key-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #584c40;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.key-symbol {
+  flex: 0 0 auto;
+  min-width: 62px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.symbol-motion { color: #6d28d9; background: #f3e8ff; }
+.symbol-gravity { color: #b45309; background: #fff7ed; }
+.symbol-tension { color: #0369a1; background: #e0f2fe; }
+.symbol-restoring { color: #047857; background: #d1fae5; }
+.symbol-equilibrium { color: #475569; background: #e2e8f0; }
+
+@media (max-width: 600px) {
+  .scene-key { margin-inline: 10px; padding: 12px; }
+  .scene-key-items { grid-template-columns: 1fr; }
+}
