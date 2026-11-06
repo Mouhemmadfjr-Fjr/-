@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   G,
   SMALL_ANGLE,
+  compoundCentreOffset,
   compoundProps,
   compoundReaction,
   largeAmplitudePeriod,
@@ -123,6 +124,12 @@ test('compound pendulum properties match both required configurations', () => {
   assertClose(withPointMass.T0, 1.53546);
   assertClose(withPointMass.Leq, 0.59719);
   assertClose(simpleT0(withPointMass.Leq), withPointMass.T0);
+});
+
+test('compound centre offset follows the rod angle and calculated distance', () => {
+  const offset = compoundCentreOffset(0.32, Math.PI / 6, 2.2);
+  assertClose(offset.x, 0.352, 1e-12);
+  assertClose(offset.y, -0.32 * 2.2 * Math.cos(Math.PI / 6), 1e-12);
 });
 
 test('RK4 preserves the undamped pendulum energy over ten periods', () => {

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {
   G,
   SMALL_ANGLE,
+  compoundCentreOffset,
   compoundProps,
   compoundReaction,
   largeAmplitudePeriod,
@@ -123,6 +124,7 @@ export function createCompoundPendulum(xStage = 5.7) {
       alpha,
     });
     const torque = -props.m * G * props.d * Math.sin(state.theta);
+    const centreOffset = compoundCentreOffset(props.d, state.theta, scale);
     return {
       ...props,
       theta: state.theta,
@@ -132,8 +134,8 @@ export function createCompoundPendulum(xStage = 5.7) {
       reaction,
       reactionMagnitude: Math.hypot(reaction.Rx, reaction.Ry),
       centrePosition: new THREE.Vector3(
-        props.d * scale * Math.sin(state.theta),
-        pivotPoint.y - props.d * scale * Math.cos(state.theta),
+        centreOffset.x,
+        pivotPoint.y + centreOffset.y,
         0,
       ),
       rows: [
@@ -175,11 +177,8 @@ export function createCompoundPendulum(xStage = 5.7) {
     endpointMass.scale.setScalar(endRadius);
     endpointMass.position.set(0, -rodLength, 0);
 
-    const centrePosition = new THREE.Vector3(
-      values.d * scale * Math.sin(values.theta),
-      -values.d * scale * Math.cos(values.theta),
-      0.11,
-    );
+    const centreOffset = compoundCentreOffset(values.d, values.theta, scale);
+    const centrePosition = new THREE.Vector3(centreOffset.x, centreOffset.y, 0.11);
     centre.position.set(0, -values.d * scale, 0.08);
     centreLabel.position.set(centrePosition.x + 0.15, pivotPoint.y + centrePosition.y + 0.18, 0.13);
     const worldCentre = pivotPoint.clone().add(centrePosition);

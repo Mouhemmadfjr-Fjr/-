@@ -110,6 +110,13 @@ export function compoundProps({ M, l, f, mp = 0 }) {
   return { m, d, I, omega0, T0, Leq };
 }
 
+export function compoundCentreOffset(d, theta, scale = 1) {
+  return {
+    x: scale * d * Math.sin(theta),
+    y: -scale * d * Math.cos(theta),
+  };
+}
+
 export function largeAmplitudePeriod(T0, thetaMax) {
   return T0 * (1 + thetaMax ** 2 / 16);
 }
