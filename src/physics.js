@@ -55,6 +55,30 @@ export function torsionT0(k, I) {
   return 2 * Math.PI * Math.sqrt(I / k);
 }
 
+export function torsionState({ M, L, m, r, k, thetaMax, t }) {
+  const I = torsionInertia({ M, L, m, r });
+  const omega0 = torsionOmega0(k, I);
+  const theta = thetaMax * Math.cos(omega0 * t);
+  const omega = -omega0 * thetaMax * Math.sin(omega0 * t);
+  const alpha = -(omega0 ** 2) * theta;
+  const torque = -k * theta;
+  const Ep = 0.5 * k * theta ** 2;
+  const Ek = 0.5 * I * omega ** 2;
+
+  return {
+    I,
+    omega0,
+    T0: torsionT0(k, I),
+    theta,
+    omega,
+    alpha,
+    torque,
+    Ep,
+    Ek,
+    E: Ep + Ek,
+  };
+}
+
 export function simpleOmega0(L, g = G) {
   return Math.sqrt(g / L);
 }

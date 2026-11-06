@@ -15,6 +15,7 @@ import {
   stepPendulumRK4,
   torsionInertia,
   torsionOmega0,
+  torsionState,
   torsionT0,
 } from './physics.js';
 
@@ -49,6 +50,22 @@ test('torsion inertia includes the rod and symmetric point masses', () => {
   assertClose(inertia, 4.9167e-3);
   assertClose(torsionOmega0(0.06, inertia), 3.4933);
   assertClose(torsionT0(0.06, inertia), 1.7986);
+});
+
+test('torsion state conserves energy and restores opposite the angle', () => {
+  const inertia = torsionInertia({ M: 0.2, L: 0.4, m: 0.05, r: 0.15 });
+  const period = torsionT0(0.06, inertia);
+  const thetaMax = 0.6;
+  const phases = [0, 0.25, 0.5, 0.75].map((fraction) => (
+    torsionState({ M: 0.2, L: 0.4, m: 0.05, r: 0.15, k: 0.06, thetaMax, t: fraction * period })
+  ));
+  for (const phase of phases) {
+    assert.ok(phase.theta === 0 || Math.sign(phase.torque) === -Math.sign(phase.theta));
+    assertClose(phase.E, 0.5 * 0.06 * thetaMax ** 2, 1e-12);
+  }
+  assertClose(phases[0].T0, torsionState({
+    M: 0.2, L: 0.4, m: 0.05, r: 0.15, k: 0.06, thetaMax: 1.2, t: 0,
+  }).T0, 1e-12);
 });
 
 test('small-angle simple-pendulum periods use the configured gravity', () => {

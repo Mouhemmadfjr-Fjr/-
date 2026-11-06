@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { G, torsionInertia, torsionOmega0, torsionT0 } from '../physics.js';
+import { G, torsionState } from '../physics.js';
 import {
   COLORS,
   createArcArrow,
@@ -21,9 +21,6 @@ export function createTorsionPendulum(xStage = -1.9) {
   const rotorY = 0.62;
   let time = 0;
   const rodLength = () => scale * params.L;
-  const inertia = () => torsionInertia(params);
-  const omega0 = () => torsionOmega0(params.k, inertia());
-
   const beam = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.16, 0.3), createMaterial('#475569'));
   beam.position.y = ceilingY;
   const base = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.18, 1.15), createMaterial('#475569'));
@@ -103,40 +100,31 @@ export function createTorsionPendulum(xStage = -1.9) {
   };
 
   function stats() {
-    const I = inertia();
-    const frequency = torsionOmega0(params.k, I);
-    const theta = params.thetaMax * Math.cos(frequency * time);
-    const angularVelocity = -frequency * params.thetaMax * Math.sin(frequency * time);
-    const angularAcceleration = -(frequency ** 2) * theta;
-    const torque = -params.k * theta;
-    const potentialEnergy = 0.5 * params.k * theta ** 2;
-    const kineticEnergy = 0.5 * I * angularVelocity ** 2;
+    const state = torsionState({ ...params, t: time });
     return {
       Irod: params.M * params.L ** 2 / 12,
-      I,
-      frequency,
-      period: torsionT0(params.k, I),
-      theta,
-      angularVelocity,
-      angularAcceleration,
-      torque,
-      potentialEnergy,
-      kineticEnergy,
-      energy: potentialEnergy + kineticEnergy,
+      ...state,
+      frequency: state.omega0,
+      period: state.T0,
+      angularVelocity: state.omega,
+      angularAcceleration: state.alpha,
+      potentialEnergy: state.Ep,
+      kineticEnergy: state.Ek,
+      energy: state.E,
       weight: (params.M + 2 * params.m) * G,
       rows: [
         ['I<sub>rod</sub>', params.M * params.L ** 2 / 12, 'kg·m²'],
-        ['I<sub>Δ</sub>', I, 'kg·m²'],
+        ['I<sub>Δ</sub>', state.I, 'kg·m²'],
         ['k', params.k, 'N·m/rad'],
-        ['ω₀', frequency, 'rad/s'],
-        ['T₀', torsionT0(params.k, I), 's'],
-        ['θ', theta, 'rad'],
-        ['θ̇', angularVelocity, 'rad/s'],
-        ['θ̈', angularAcceleration, 'rad/s²'],
-        ['Γ = −kθ', torque, 'N·m'],
-        ['Eₖ', kineticEnergy, 'J'],
-        ['Eₚ', potentialEnergy, 'J'],
-        ['E', potentialEnergy + kineticEnergy, 'J'],
+        ['ω₀', state.omega0, 'rad/s'],
+        ['T₀', state.T0, 's'],
+        ['θ', state.theta, 'rad'],
+        ['θ̇', state.omega, 'rad/s'],
+        ['θ̈', state.alpha, 'rad/s²'],
+        ['Γ = −kθ', state.torque, 'N·m'],
+        ['Eₖ', state.Ek, 'J'],
+        ['Eₚ', state.Ep, 'J'],
+        ['E', state.E, 'J'],
       ],
     };
   }
