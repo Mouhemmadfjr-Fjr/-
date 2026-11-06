@@ -3,8 +3,8 @@ import {
   G,
   SMALL_ANGLE,
   largeAmplitudePeriod,
+  simpleObservables,
   simpleOmega0,
-  simpleT0,
   stepPendulumRK4,
 } from '../physics.js';
 import {
@@ -89,12 +89,9 @@ export function createSimplePendulum(xStage = 1.9) {
   }
 
   function stats() {
-    const omega0 = simpleOmega0(params.L, params.g);
-    const period0 = simpleT0(params.L, params.g);
     const state = getState();
-    const tension = params.m * (params.g * Math.cos(state.theta) + params.L * state.omega ** 2);
-    const tangentWeight = -params.m * params.g * Math.sin(state.theta);
-    const normalWeight = params.m * params.g * Math.cos(state.theta);
+    const observables = simpleObservables({ ...params, ...state });
+    const { omega0, T0: period0, tension, tangentWeight, normalWeight } = observables;
     return {
       theta: state.theta,
       omega: state.omega,

@@ -7,6 +7,7 @@ import {
   compoundReaction,
   largeAmplitudePeriod,
   rodInertiaCenter,
+  simpleObservables,
   simpleT0,
   springState,
   springOmega0,
@@ -72,6 +73,18 @@ test('small-angle simple-pendulum periods use the configured gravity', () => {
   assert.equal(G, 10);
   assertClose(simpleT0(1.6), 2.5133);
   assertClose(simpleT0(1), 1.9869);
+});
+
+test('simple-pendulum tension and weight components match the reference force balance', () => {
+  const atBottom = simpleObservables({ L: 0.4, m: 0.1, g: 10, theta: 0, omega: 5 });
+  assertClose(atBottom.tension, 2, 1e-12);
+  assert.equal(Math.abs(atBottom.tangentWeight), 0);
+  assertClose(atBottom.normalWeight, 1, 1e-12);
+
+  const displaced = simpleObservables({ L: 1.6, m: 0.1, g: 10, theta: Math.PI / 3, omega: 0 });
+  assertClose(displaced.tension, 0.5, 1e-12);
+  assert.ok(displaced.tangentWeight < 0);
+  assertClose(displaced.normalWeight, 0.5, 1e-12);
 });
 
 test('large-angle period approximation and numerical RK4 period are distinct', () => {

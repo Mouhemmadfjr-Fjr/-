@@ -87,6 +87,16 @@ export function simpleT0(L, g = G) {
   return 2 * Math.PI * Math.sqrt(L / g);
 }
 
+export function simpleObservables({ L, m, g, theta, omega }) {
+  return {
+    omega0: simpleOmega0(L, g),
+    T0: simpleT0(L, g),
+    tension: m * (g * Math.cos(theta) + L * omega ** 2),
+    tangentWeight: -m * g * Math.sin(theta),
+    normalWeight: m * g * Math.cos(theta),
+  };
+}
+
 export function compoundProps({ M, l, f, mp = 0 }) {
   const yRod = l / 2 - f * l;
   const yEnd = l - f * l;
