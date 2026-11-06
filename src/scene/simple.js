@@ -166,7 +166,7 @@ export function createSimplePendulum(xStage = 1.9) {
     const radial = bobPosition.clone().sub(pivotPoint).normalize();
     const towardPivot = pivotPoint.clone().sub(bobPosition).normalize();
     const tangent = new THREE.Vector3(Math.cos(values.theta), Math.sin(values.theta), 0);
-    const forceScale = 0.7;
+    const forceScale = 1;
     weightArrow.set(bobPosition.clone().add(new THREE.Vector3(0.24, 0, 0.22)), new THREE.Vector3(0, -1, 0), forceScale);
     tensionArrow.set(bobPosition.clone().add(new THREE.Vector3(-0.24, 0, 0.22)), towardPivot, forceScale * Math.abs(values.tension / (params.m * params.g)));
     tangentArrow.set(bobPosition.clone().add(new THREE.Vector3(-0.44, 0, 0.22)), tangent.clone().multiplyScalar(Math.sign(values.tangentWeight)), forceScale * Math.abs(values.tangentWeight / (params.m * params.g)));

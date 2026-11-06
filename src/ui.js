@@ -75,6 +75,7 @@ export function createUI(pendulums, actions) {
               <span class="key-item"><b class="key-symbol symbol-tension">Fₛ / T</b><span>توتر النابض أو الخيط · أزرق</span></span>
               <span class="key-item"><b class="key-symbol symbol-restoring">F / Γ</b><span>قوة أو عزم الإرجاع · وردي</span></span>
               <span class="key-item"><b class="key-symbol symbol-reaction">R</b><span>رد فعل المحور · أخضر</span></span>
+              <span class="key-item"><b class="key-symbol symbol-motion">x / x₀ / Xₘₐₓ / θ</b><span>الإزاحة والاستطالة والسعة والزاوية</span></span>
               <span class="key-item"><b class="key-symbol symbol-equilibrium">O / c / d / Δ</b><span>التوازن، مركز العطالة، البعد، المحور</span></span>
               <span class="key-item"><b class="key-symbol symbol-path">┄</b><span>التوازن والمسار بنمطين مختلفين</span></span>
             </div>
@@ -199,7 +200,7 @@ export function createUI(pendulums, actions) {
     });
     app.querySelectorAll('.control-group').forEach((group) => {
       group.hidden = mode !== 'all' && group.dataset.mode !== mode;
-      if (mode === 'all') group.open = false;
+      group.open = mode !== 'all' && group.dataset.mode === mode;
     });
     actions.setMode(mode);
     refreshValues();
@@ -219,7 +220,11 @@ export function createUI(pendulums, actions) {
     });
     syncControls();
     state.play = true;
+    state.showForces = true;
+    state.showEnergy = true;
     app.querySelector('#toggle-play').textContent = 'إيقاف مؤقت';
+    app.querySelector('#toggle-forces').textContent = 'إخفاء القوى';
+    app.querySelector('#toggle-energy').textContent = 'إخفاء الطاقة';
     actions.reset();
     refreshValues();
   });

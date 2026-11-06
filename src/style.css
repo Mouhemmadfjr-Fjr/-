@@ -374,12 +374,12 @@ button, input {
   unicode-bidi: isolate;
 }
 .symbol-motion { color: #6d28d9; background: #f3e8ff; }
-.symbol-gravity { color: #b45309; background: #fff7ed; }
-.symbol-tension { color: #0369a1; background: #e0f2fe; }
-.symbol-restoring { color: #be185d; background: #fce7f3; }
-.symbol-reaction { color: #15803d; background: #dcfce7; }
-.symbol-equilibrium { color: #475569; background: #e2e8f0; }
-.symbol-path { color: #64748b; background: #f1f5f9; }
+.symbol-gravity { color: #d97706; background: #fff7ed; }
+.symbol-tension { color: #0284c7; background: #e0f2fe; }
+.symbol-restoring { color: #db2777; background: #fce7f3; }
+.symbol-reaction { color: #16a34a; background: #dcfce7; }
+.symbol-equilibrium { color: #64748b; background: #e2e8f0; }
+.symbol-path { color: #94a3b8; background: #f1f5f9; }
 
 .control-group[hidden] { display: none; }
 .control-group summary {

@@ -60,13 +60,13 @@ export function createSpringPendulum(xStage = -5.7) {
   const restDimension = createDimensionLine(
     new THREE.Vector3(0, naturalEndY, 0.08),
     new THREE.Vector3(0, equilibriumY + bodyRadius(), 0.08),
-    { label: 'x₀', offset: [0.53, 0, 0] },
+    { label: 'x₀', offset: [1.15, 0, 0] },
   );
   group.add(restDimension);
   const displacementDimension = createDimensionLine(
     new THREE.Vector3(0, equilibriumY, 0.1),
     new THREE.Vector3(0, equilibriumY, 0.1),
-    { label: 'x', offset: [-0.52, 0, 0] },
+    { label: 'x', offset: [1.15, 0, 0] },
   );
   group.add(displacementDimension);
 
@@ -97,7 +97,7 @@ export function createSpringPendulum(xStage = -5.7) {
         new THREE.Vector3(rulerX + (major ? 0.16 : 0.08), y, 0.11),
       ], { color: '#475569', dash: 2, gap: 0 }));
       if (major) {
-        const label = createLabel(`${Math.abs(centimetre)}`, { size: 0.24 });
+        const label = createLabel(`${centimetre}`, { size: 0.24 });
         label.position.set(rulerX - 0.21, y, 0.16);
         ruler.add(label);
       }
@@ -126,7 +126,11 @@ export function createSpringPendulum(xStage = -5.7) {
   const springArrow = createForceArrow(COLORS.tension);
   const restoringArrow = createForceArrow(COLORS.restoring);
   group.add(weightArrow, springArrow, restoringArrow);
-  const forceLabels = [createLabel('w'), createLabel('Fₛ', { color: COLORS.tension }), createLabel('F', { color: COLORS.restoring })];
+  const forceLabels = [
+    createLabel('w', { size: 0.29 }),
+    createLabel('Fₛ', { color: COLORS.tension, size: 0.29 }),
+    createLabel('F', { color: COLORS.restoring, size: 0.29 }),
+  ];
   forceLabels.forEach((label) => group.add(label));
   group.userData = {
     arrows: { w: weightArrow, Fs: springArrow, F: restoringArrow },
@@ -211,13 +215,16 @@ export function createSpringPendulum(xStage = -5.7) {
     if (nextRulerPositionKey !== rulerPositionKey) rebuildRuler(currentEquilibriumY);
 
     const centre = new THREE.Vector3(0, y, 0.35);
-    weightArrow.set(centre.clone().add(new THREE.Vector3(0.3, 0, 0)), new THREE.Vector3(0, -1, 0), 0.12 * values.weight);
+    weightArrow.set(centre.clone().add(new THREE.Vector3(0.78, 0, 0)), new THREE.Vector3(0, -1, 0), 0.12 * values.weight);
     const springSign = Math.sign(values.springForce) || 1;
-    springArrow.set(centre.clone().add(new THREE.Vector3(-0.3, 0, 0)), new THREE.Vector3(0, springSign, 0), 0.12 * Math.abs(values.springForce));
-    restoringArrow.set(centre.clone().add(new THREE.Vector3(-0.52, 0, 0)), new THREE.Vector3(0, Math.sign(values.x), 0), 0.12 * Math.abs(values.restoringForce));
-    forceLabels[0].position.copy(centre).add(new THREE.Vector3(0.62, -0.2, 0));
-    forceLabels[1].position.copy(centre).add(new THREE.Vector3(-0.78, springSign * 0.62, 0));
-    forceLabels[2].position.copy(centre).add(new THREE.Vector3(-0.78, Math.sign(values.x || 1) * 0.62, 0));
+    const weightLength = 0.12 * values.weight;
+    const springLength = 0.12 * Math.abs(values.springForce);
+    const restoringLength = 0.12 * Math.abs(values.restoringForce);
+    springArrow.set(centre.clone().add(new THREE.Vector3(-0.3, 0, 0)), new THREE.Vector3(0, springSign, 0), springLength);
+    restoringArrow.set(centre.clone().add(new THREE.Vector3(0.3, 0, 0)), new THREE.Vector3(0, Math.sign(values.x), 0), restoringLength);
+    forceLabels[0].position.copy(centre).add(new THREE.Vector3(1.18, -weightLength - 0.16, 0));
+    forceLabels[1].position.copy(centre).add(new THREE.Vector3(-0.72, springSign * (springLength + 0.16), 0));
+    forceLabels[2].position.copy(centre).add(new THREE.Vector3(0.3, Math.sign(values.x || 1) * (restoringLength + 0.16), 0));
 
     const detail = flags.detail;
     [originLabel, restTick, restDimension, displacementDimension, ruler, amplitudeMarks]

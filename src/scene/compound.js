@@ -194,7 +194,7 @@ export function createCompoundPendulum(xStage = 5.7) {
       0.15,
     );
 
-    const forceScale = 0.7;
+    const forceScale = 1;
     const weightOrigin = worldCentre.clone().add(new THREE.Vector3(0.28, 0, 0.15));
     weightArrow.set(weightOrigin, new THREE.Vector3(0, -1, 0), forceScale);
     const reactionOrigin = pivotPoint.clone().add(new THREE.Vector3(0.15, 0, 0.2));
