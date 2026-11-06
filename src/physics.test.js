@@ -8,6 +8,7 @@ import {
   largeAmplitudePeriod,
   rodInertiaCenter,
   simpleT0,
+  springState,
   springOmega0,
   springT0,
   springX0,
@@ -27,6 +28,19 @@ test('spring oscillator properties match the reference values', () => {
   assertClose(springX0(0.5, 20), 0.25);
   assertClose(springOmega0(0.5, 20), 6.3246);
   assertClose(springT0(0.5, 20), 0.99346);
+});
+
+test('spring state keeps the visible displacement and signed forces consistent', () => {
+  const initial = springState({ m: 0.5, k: 20, Xmax: 0.08, t: 0 });
+  assertClose(initial.x, 0.08, 1e-12);
+  assertClose(initial.x0, 0.25, 1e-12);
+  assertClose(initial.Fs - 5, Math.abs(initial.F), 1e-12);
+
+  const halfPeriod = springState({ m: 0.5, k: 20, Xmax: 0.08, t: springT0(0.5, 20) / 2 });
+  assertClose(halfPeriod.x, -0.08, 1e-12);
+  assert.ok(halfPeriod.F > 0);
+  assertClose(Math.abs(halfPeriod.Fs - 5), Math.abs(halfPeriod.F), 1e-12);
+  assertClose(halfPeriod.E, 0.5 * 20 * 0.08 ** 2, 1e-12);
 });
 
 test('torsion inertia includes the rod and symmetric point masses', () => {

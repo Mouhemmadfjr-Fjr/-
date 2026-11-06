@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { G, springOmega0, springT0, springX0 } from '../physics.js';
+import { G, springState, springX0 } from '../physics.js';
 import {
   COLORS,
   createDashedLine,
@@ -140,45 +140,31 @@ export function createSpringPendulum(xStage = -5.7) {
   }
 
   function stats() {
-    const omega0 = springOmega0(params.m, params.k);
-    const x0 = springX0(params.m, params.k);
-    const x = params.Xmax * Math.cos(omega0 * time);
-    const velocity = -omega0 * params.Xmax * Math.sin(omega0 * time);
-    const acceleration = -(omega0 ** 2) * x;
-    const springForce = params.k * (x0 + x);
-    const restoringForce = -params.k * x;
-    const kineticEnergy = 0.5 * params.m * velocity ** 2;
-    const potentialEnergy = 0.5 * params.k * x ** 2;
+    const state = springState({ ...params, t: time });
     return {
-      x,
-      omega0,
-      T0: springT0(params.m, params.k),
-      x0,
-      velocity,
-      acceleration,
-      springForce,
-      restoringForce,
+      ...state,
+      velocity: state.v,
+      acceleration: state.a,
+      springForce: state.Fs,
+      restoringForce: state.F,
       weight: params.m * G,
-      kineticEnergy,
-      potentialEnergy,
-      energy: kineticEnergy + potentialEnergy,
       equilibriumY: equilibriumPosition(),
-      centreY: equilibriumPosition() - scale * x,
-      springLength: scale * (naturalLength + x0 + x),
+      centreY: equilibriumPosition() - scale * state.x,
+      springLength: scale * (naturalLength + state.x0 + state.x),
       rows: [
         ['m', params.m, 'kg'],
         ['k', params.k, 'N/m'],
-        ['x₀', x0, 'm'],
-        ['ω₀', omega0, 'rad/s'],
-        ['T₀', springT0(params.m, params.k), 's'],
-        ['x', x, 'm'],
-        ['v', velocity, 'm/s'],
-        ['a', acceleration, 'm/s²'],
-        ['F = −kx', restoringForce, 'N'],
-        ['Fₛ', springForce, 'N'],
-        ['Eₖ', kineticEnergy, 'J'],
-        ['Eₚ', potentialEnergy, 'J'],
-        ['E', kineticEnergy + potentialEnergy, 'J'],
+        ['x₀', state.x0, 'm'],
+        ['ω₀', state.omega0, 'rad/s'],
+        ['T₀', state.T0, 's'],
+        ['x', state.x, 'm'],
+        ['v', state.v, 'm/s'],
+        ['a', state.a, 'm/s²'],
+        ['F = −kx', state.F, 'N'],
+        ['Fₛ', state.Fs, 'N'],
+        ['Eₖ', state.Ek, 'J'],
+        ['Eₚ', state.Ep, 'J'],
+        ['E', state.E, 'J'],
       ],
     };
   }

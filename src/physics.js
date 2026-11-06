@@ -13,6 +13,32 @@ export function springX0(m, k) {
   return m * G / k;
 }
 
+export function springState({ m, k, Xmax, t }) {
+  const omega0 = springOmega0(m, k);
+  const x0 = springX0(m, k);
+  const x = Xmax * Math.cos(omega0 * t);
+  const v = -omega0 * Xmax * Math.sin(omega0 * t);
+  const a = -(omega0 ** 2) * x;
+  const Fs = k * (x0 + x);
+  const F = -k * x;
+  const Ek = 0.5 * m * v ** 2;
+  const Ep = 0.5 * k * x ** 2;
+
+  return {
+    x0,
+    omega0,
+    T0: springT0(m, k),
+    x,
+    v,
+    a,
+    Fs,
+    F,
+    Ek,
+    Ep,
+    E: Ek + Ep,
+  };
+}
+
 export function rodInertiaCenter(M, L) {
   return M * L ** 2 / 12;
 }

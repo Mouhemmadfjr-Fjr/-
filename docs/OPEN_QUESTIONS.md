@@ -1,0 +1,4 @@
+# Questions requiring clarification
+
+1. The spring-slider ranges permit combinations for which `x₀ + x < 0` (for example `m = 0.1 kg`, `k = 100 N/m`, `X_max = 0.15 m`). The reference gives signed `Fₛ = k(x₀ + x)` but draws `Fₛ` upward; the task also says the `Fₛ` arrow always points upward. These cannot both hold during compression. The implementation follows the signed Hooke-law formula and reverses the `Fₛ` arrow during compression, with length proportional to `|Fₛ|`. Please confirm whether compression should instead be disallowed.
+2. The simple-pendulum acceptance asks for `T′ = 2.6855 s` at `θ_max = 1.05 rad`, `L = 1.6 m`, and `g = 10 m/s²`. The stated approximation `T₀(1 + θ_max²/16)` evaluates to `2.68645 s` for exactly `1.05 rad`; `2.6855 s` corresponds to treating the amplitude as exactly `60° = π/3 rad`. The implementation uses the specified formula with the actual slider value and does not substitute a different angle.
